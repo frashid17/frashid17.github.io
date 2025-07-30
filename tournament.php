@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KEMU – MSA Pool Tournament</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #e0eafc, #cfdef3);
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+        }
+        h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        img.pool-table {
+            display: block;
+            margin: 0 auto 30px auto;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            margin: 0 auto;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        .results {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .results h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .results ol, .results ul {
+            padding-left: 20px;
+        }
+        .results li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>KEMU – MSA Pool Tournament (31st July, 2025)</h2>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Pool_table_diagram.svg/1200px-Pool_table_diagram.svg.png" alt="Pool Table" class="pool-table">
+
+<h3>Enter Points for Group A</h3>
+<table>
+    <thead>
+    <tr>
+        <th>Player</th>
+        <th>Points</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td>P1</td><td><input type="number" min="0" id="A-P1"></td></tr>
+    <tr><td>P2</td><td><input type="number" min="0" id="A-P2"></td></tr>
+    <tr><td>P3</td><td><input type="number" min="0" id="A-P3"></td></tr>
+    <tr><td>P4</td><td><input type="number" min="0" id="A-P4"></td></tr>
+    <tr><td>P5</td><td><input type="number" min="0" id="A-P5"></td></tr>
+    </tbody>
+</table>
+
+<h3>Enter Points for Group B</h3>
+<table>
+    <thead>
+    <tr>
+        <th>Player</th>
+        <th>Points</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td>P6</td><td><input type="number" min="0" id="B-P6"></td></tr>
+    <tr><td>P7</td><td><input type="number" min="0" id="B-P7"></td></tr>
+    <tr><td>P8</td><td><input type="number" min="0" id="B-P8"></td></tr>
+    <tr><td>P9</td><td><input type="number" min="0" id="B-P9"></td></tr>
+    <tr><td>P10</td><td><input type="number" min="0" id="B-P10"></td></tr>
+    </tbody>
+</table>
+
+<button onclick="calculateWinners()">Calculate Winners</button>
+
+<div class="results" id="results"></div>
+
+<script>
+    const allPlayerIds = [
+        'A-P1', 'A-P2', 'A-P3', 'A-P4', 'A-P5',
+        'B-P6', 'B-P7', 'B-P8', 'B-P9', 'B-P10'
+    ];
+
+    // Load from localStorage on page load
+    window.onload = function () {
+        allPlayerIds.forEach(id => {
+            const saved = localStorage.getItem(id);
+            if (saved !== null) {
+                document.getElementById(id).value = saved;
+            }
+        });
+    }
+
+    // Save input changes
+    allPlayerIds.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', () => {
+                localStorage.setItem(id, input.value);
+            });
+        }
+    });
+
+    function calculateWinners() {
+        const getPoints = (group, players) => players.map(p => ({
+            name: p,
+            points: parseInt(document.getElementById(`${group}-${p}`).value) || 0
+        })).sort((a, b) => b.points - a.points);
+
+        const groupA = getPoints('A', ['P1','P2','P3','P4','P5']);
+        const groupB = getPoints('B', ['P6','P7','P8','P9','P10']);
+
+        const resultHTML = `
+    <h3>Group A Results</h3>
+    <ol>${groupA.map(p => `<li>${p.name} - ${p.points} pts</li>`).join('')}</ol>
+    <strong>Winner:</strong> ${groupA[0].name}<br>
+    <strong>Runner-Up:</strong> ${groupA[1].name}
+    <h3>Group B Results</h3>
+    <ol>${groupB.map(p => `<li>${p.name} - ${p.points} pts</li>`).join('')}</ol>
+    <strong>Winner:</strong> ${groupB[0].name}<br>
+    <strong>Runner-Up:</strong> ${groupB[1].name}
+    <h3>Semi-Finals</h3>
+    <ul>
+      <li>${groupA[0].name} (Group A Winner) vs ${groupB[1].name} (Group B Runner-Up)</li>
+      <li>${groupB[0].name} (Group B Winner) vs ${groupA[1].name} (Group A Runner-Up)</li>
+    </ul>
+    <h3>Final</h3>
+    <p>Winner of Semi-Final 1 vs Winner of Semi-Final 2</p>
+    <h3>3rd Place Match</h3>
+    <p>Loser of Semi-Final 1 vs Loser of Semi-Final 2</p>
+  `;
+
+        document.getElementById('results').innerHTML = resultHTML;
+    }
+</script>
+
+</body>
+</html>
